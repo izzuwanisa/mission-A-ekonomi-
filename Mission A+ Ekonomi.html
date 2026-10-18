@@ -1,0 +1,415 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mission A+ Ekonomi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;500;700&display=swap">
+<style>
+/* Layout: one phone-width column; a sticky preview bar switches between three screens (welcome, pick a state, report).
+   Dark-first midnight blue with an orange "A+" accent. Orange = attention/progress, blue = strength. */
+:root{
+  --bg:#0A1330; --surface:#121F45; --surface2:#1A2A57; --ink:#EEF2FF; --ink2:#A7B5D8; --line:#2A3B6E;
+  --accent:#FF8A2B; --accent-ink:#1B0F00; --bar:#6FA8FF; --good:#3DD68C; --g1:#FFC24A; --g2:#FF6A1F; --glowA:rgba(255,122,31,.30); --glowB:rgba(60,120,255,.28); --rim:rgba(255,214,140,.55); --warn:#FFC857; --bad:#FF7A7A;
+  --f-display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#F3F6FD; --surface:#FFFFFF; --surface2:#E7EEFB; --ink:#0A1330; --ink2:#44537A; --line:#D3DCF0;
+  --accent:#C94F00; --accent-ink:#FFFFFF; --bar:#2F6FE0; --good:#12794B; --warn:#8A5A00; --bad:#BD3030; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#F3F6FD; --surface:#FFFFFF; --surface2:#E7EEFB; --ink:#0A1330; --ink2:#44537A; --line:#D3DCF0;
+  --accent:#C94F00; --accent-ink:#FFFFFF; --bar:#2F6FE0; --good:#12794B; --warn:#8A5A00; --bad:#BD3030; color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(120% 55% at 100% 0%,var(--glowA),transparent 62%),radial-gradient(110% 50% at 0% 100%,var(--glowB),transparent 62%),var(--bg);background-attachment:fixed;color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+.col{max-width:480px;margin:0 auto}
+
+/* preview bar */
+.pv{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:10px;margin-inline:-4px}
+.pv .col{display:flex;flex-direction:column;gap:6px}
+.pv small{color:var(--ink2);font-size:12px;letter-spacing:.04em}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 6px;font-weight:700;font-size:13.5px;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* shared */
+.logo{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-family:var(--f-display);font-weight:800;font-size:22px}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-weight:800;font-size:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:14px 20px;font-weight:700;font-size:16px;min-height:52px;width:100%}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn.small{width:auto;min-height:40px;padding:8px 16px;font-size:14px;border-radius:999px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+.muted{color:var(--ink2)}
+.screen{display:none;flex-direction:column;gap:18px;padding-top:14px}
+.screen.on{display:flex}
+.note{font-size:12.5px;color:var(--ink2);text-align:center}
+
+/* welcome */
+.hero{padding-top:18px;display:flex;flex-direction:column;gap:14px}
+.hero h1{font-size:clamp(40px,12vw,56px);line-height:.98;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.facts{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13.5px;font-weight:500}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:700;color:var(--ink2)}
+.field input{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;font-size:18px;font-weight:700;min-width:0}
+.back{display:flex;gap:14px;align-items:center}
+.avatar{width:52px;height:52px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:22px;color:var(--accent);border:2px solid var(--accent)}
+.mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.mini div{background:var(--surface2);border-radius:12px;padding:10px 12px}
+.mini b{display:block;font-family:var(--f-display);font-size:22px;line-height:1.1}
+.mini span{font-size:12px;color:var(--ink2)}
+
+/* menu */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.greet h2{font-size:28px;line-height:1.1}
+.cont{display:flex;flex-direction:column;gap:12px;background:var(--surface2);border:1px solid var(--line)}
+.cont .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.prog{height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.sc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;min-width:0}
+.sc:hover{border-color:var(--accent)}
+.sc .n{font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1.15;overflow-wrap:anywhere}
+.sc .r{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.st{font-size:12px;font-weight:700;color:var(--ink2)}
+.gr{min-width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:18px;background:var(--surface2);border:1.5px solid var(--line);color:var(--ink2)}
+.gr.hi{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.gr.mid{border-color:var(--bar);color:var(--bar)}
+.st.go{color:var(--accent)}
+.sc.done .st{color:var(--good)}
+
+/* report */
+.gradecard{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.bigg{width:96px;height:96px;border-radius:24px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:46px;letter-spacing:-.02em}
+.gradecard .pc{font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1}
+.up{color:var(--good);font-weight:700;font-size:14px}
+.next{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.track{position:relative;height:10px;border-radius:10px;background:var(--line)}
+.track i{position:absolute;inset:0 auto 0 0;border-radius:10px;background:var(--accent)}
+.track s{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.7}
+.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2)}
+.sec h3{font-size:22px;margin-bottom:4px}
+.sec>p{margin:0 0 12px;color:var(--ink2);font-size:14.5px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 12px 10px}
+.chart svg{display:block;width:100%;height:auto}
+.chart text{font-family:var(--f-body);font-size:10.5px;fill:var(--ink2)}
+.chart .pt{cursor:pointer}
+.readout{font-size:14px;padding:6px 8px 2px;min-height:28px}
+.readout b{font-family:var(--f-display)}
+.topics{display:flex;flex-direction:column;gap:12px}
+.tp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:baseline}
+.tp .nm{font-weight:500;font-size:15px}
+.tp .v{font-weight:700;font-size:14px}
+.tp .tag{font-size:12px;font-weight:700;margin-left:8px}
+.tp .tag.weak{color:var(--accent)}
+.tp .tag.ok{color:var(--bar)}
+.tp .bar{grid-column:1/-1;height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.tp .bar i{display:block;height:100%;border-radius:8px;background:var(--bar)}
+.tp .bar i.weak{background:var(--accent)}
+.redo{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.redo a{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface2);color:var(--ink);text-decoration:none;font-size:14.5px}
+.advice{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.advice li{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px}
+.advice .k{width:32px;height:32px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-weight:800;color:var(--accent);font-family:var(--f-display)}
+.badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bd{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;font-size:12.5px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.bd .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;background:var(--accent);color:var(--accent-ink)}
+.bd.lock{opacity:.6}
+.bd.lock .ic{background:var(--line);color:var(--ink2)}
+.toast{font-size:13px;color:var(--good);min-height:20px;text-align:center}
+@media (prefers-reduced-motion:no-preference){.prog i,.track i{transition:width .5s ease}}
+/* identiti A+: kilauan gradien oren-emas di atas biru malam, huruf bulat tebal */
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--g1:#FFA23C;--g2:#D9500A;--glowA:rgba(255,138,43,.22);--glowB:rgba(47,111,224,.16);--rim:rgba(201,79,0,.45)}}
+:root[data-theme="light"]{--g1:#FFA23C;--g2:#D9500A;--glowA:rgba(255,138,43,.22);--glowB:rgba(47,111,224,.16);--rim:rgba(201,79,0,.45)}
+.logo{background:linear-gradient(145deg,var(--g1),var(--g2));border:1.5px solid var(--rim);border-radius:14px;color:var(--accent-ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 6px 18px var(--glowA);text-shadow:0 1px 0 rgba(255,255,255,.35)}
+.hero h1 em{background:linear-gradient(100deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;padding-right:.06em}
+.btn{border-radius:18px}
+.btn.primary{background:linear-gradient(145deg,var(--g1),var(--g2));box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 8px 22px var(--glowA)}
+.card,.sc,.chart,.bd{border-radius:22px;background:linear-gradient(160deg,var(--surface),var(--surface2));border-color:var(--line)}
+.sc{border-radius:20px}
+.cont{border-color:var(--rim)}
+.bigg{background:linear-gradient(145deg,var(--g1),var(--g2));border:2px solid var(--rim);border-radius:28px;box-shadow:inset 0 3px 0 rgba(255,255,255,.4),0 10px 28px var(--glowA)}
+.gr.hi{background:linear-gradient(145deg,var(--g1),var(--g2));border-color:var(--rim)}
+.prog i,.track i{background:linear-gradient(90deg,var(--g1),var(--g2))}
+.bd .ic{background:linear-gradient(145deg,var(--g1),var(--g2));border:1.5px solid var(--rim)}
+.bd.lock .ic{background:var(--line);border-color:transparent}
+.seg button[aria-pressed="true"]{background:linear-gradient(145deg,var(--g1),var(--g2))}
+.wcard{display:flex;flex-direction:column}
+.hero h1 em{padding-right:0}
+/* muka depan beranimasi + bunyi */
+.lnk{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;font-size:12px;font-weight:700}
+.splash{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;justify-content:flex-end;background:radial-gradient(120% 60% at 100% 0%,var(--glowA),transparent 62%),radial-gradient(110% 55% at 0% 100%,var(--glowB),transparent 62%),var(--bg);padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(28px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));transition:opacity .6s ease,visibility .6s}
+.splash.out{opacity:0;visibility:hidden}
+.splash .inner{width:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.snd{position:absolute;top:max(14px,env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink)}
+.snd[aria-pressed="false"]{color:var(--ink2)}
+.sp-logo{width:88px;height:88px;border-radius:26px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:44px;color:var(--accent-ink);background:linear-gradient(145deg,var(--g1),var(--g2));border:2px solid var(--rim);box-shadow:inset 0 3px 0 rgba(255,255,255,.45),0 12px 36px var(--glowA)}
+.sp-title{font-size:clamp(44px,15vw,68px);line-height:.95;font-weight:800;display:flex;flex-direction:column}
+.sp-title .ch{display:inline-block;opacity:0;transform:translateY(.55em) scale(.92)}
+.sp-title .l2 .ch.hl{background:linear-gradient(100deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sp-title .sp{display:inline-block;width:.28em}
+.sp-tag{margin:0;min-height:1.6em;font-size:19px;font-weight:700;color:var(--ink2)}
+.caret{display:inline-block;width:2px;height:1.05em;background:var(--accent);margin-left:3px;vertical-align:-.15em;animation:blink 1s steps(1) infinite}
+.splash .btn{margin-top:4px}
+.splash.go .btn,.splash.go .note{opacity:0;pointer-events:none;transition:opacity .25s}
+.splash:not(.go) .btn{animation:pulse 1.8s ease-in-out infinite}
+.sp-logo{transform:scale(.6);opacity:0}
+.splash.go .sp-logo{animation:pop .7s cubic-bezier(.2,.9,.3,1.4) forwards}
+.splash.go .sp-title .ch{animation:drop .55s cubic-bezier(.2,.9,.3,1.25) forwards;animation-delay:calc(var(--i)*60ms + 250ms)}
+.splash:not(.go) .sp-logo{opacity:1;transform:none}
+.splash:not(.go) .sp-title .ch{opacity:1;transform:none}
+.rise>*{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+.rise>*:nth-child(2){animation-delay:.12s}.rise>*:nth-child(3){animation-delay:.24s}.rise>*:nth-child(4){animation-delay:.36s}
+@keyframes drop{from{opacity:0;transform:translateY(.55em) scale(.92)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6) rotate(-8deg)}70%{transform:scale(1.08) rotate(2deg)}100%{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes blink{50%{opacity:0}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+@media (prefers-reduced-motion:reduce){.sp-title .ch,.sp-logo{animation:none!important;opacity:1!important;transform:none!important}.rise>*,.splash:not(.go) .btn,.caret{animation:none!important}.splash{transition:none}}
+.sp-title .l1,.sp-title .l2{white-space:nowrap}
+.sp-title .l2{font-size:.8em}
+.pv{margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+</style>
+
+<div class="pv"><div class="col">
+  <small>PRATONTON REKAAN · data di bawah ialah contoh · <button type="button" class="lnk" id="replay">Ulang muka depan</button></small>
+  <div class="seg" role="group" aria-label="Pilih skrin">
+    <button data-s="welcome" aria-pressed="true">Muka depan</button>
+    <button data-s="menu" aria-pressed="false">Soalan</button>
+    <button data-s="report" aria-pressed="false">Laporan</button>
+  </div>
+</div></div>
+
+<div class="splash" id="splash" role="dialog" aria-label="Pembukaan Mission A+ Ekonomi">
+  <button type="button" class="snd" aria-pressed="true" aria-label="Bunyi">Bunyi: hidup</button>
+  <div class="inner">
+    <div class="sp-logo">A+</div>
+    <h1 class="sp-title" aria-label="Mission A+ Ekonomi"><span class="l1" aria-hidden="true"></span><span class="l2" aria-hidden="true"></span></h1>
+    <p class="sp-tag" aria-live="polite"><span id="typed"></span><i class="caret" aria-hidden="true"></i></p>
+    <button type="button" class="btn primary" id="start">Tekan untuk mula</button>
+    <div class="note" style="text-align:left">Bunyi dimainkan selepas butang ditekan. Boleh dimatikan di penjuru atas.</div>
+  </div>
+</div>
+
+<main class="col">
+
+<!-- 1. WELCOME -->
+<section class="screen on" id="s-welcome">
+  <div class="hero">
+    <div class="brand"><span class="logo">A+</span>Mission A+ Ekonomi</div>
+    <h1>Latihan harian,<br><em>capai A+</em>.</h1>
+    
+    <div class="facts"><span class="chip">13 set soalan trial</span><span class="chip">520 soalan</span><span class="chip">Laporan automatik</span></div>
+  </div>
+  <div class="seg" style="grid-template-columns:1fr 1fr" role="group" aria-label="Contoh keadaan">
+    <button data-w="new" aria-pressed="false">Murid baharu</button>
+    <button data-w="old" aria-pressed="true">Murid lama</button>
+  </div>
+  <div id="w-new" hidden class="card wcard" style="gap:14px">
+    <div class="field"><label for="nm">Nama anda</label><input id="nm" placeholder="Contoh: Aina Sofea" autocomplete="name"></div>
+    <button class="btn primary" data-s="menu">Mula berlatih</button>
+    <div class="note">Rekod disimpan dalam akaun Claude anda dan boleh disambung di telefon lain.</div>
+  </div>
+  <div id="w-old" class="card wcard" style="gap:6px">
+    <div class="back"><div class="avatar">A</div><div><div class="eyebrow">Selamat kembali</div><h2 style="font-size:26px">Aina Sofea</h2></div></div>
+    <div class="mini">
+      <div><b class="num">5</b><span>set siap</span></div>
+      <div><b class="num">B+</b><span>gred terkini</span></div>
+      <div><b class="num">3</b><span>hari berturut</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+      <button class="btn primary" data-s="menu">Sambung: Kelantan, soalan 23/40</button>
+      <button class="btn ghost" data-s="report">Lihat laporan saya</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2. MENU -->
+<section class="screen" id="s-menu">
+  <div class="top"><div class="brand"><span class="logo" style="width:36px;height:36px;font-size:18px;border-radius:10px">A+</span></div><button class="btn ghost small" data-s="report">Laporan</button></div>
+  <div class="greet"><div class="eyebrow">Selasa petang</div><h2>Selamat datang, Aina. Teruskan usaha ke arah A+.</h2></div>
+  <div class="card cont">
+    <div class="row"><div><div class="eyebrow">Teruskan</div><h3 style="font-size:22px">Kelantan</h3></div><span class="chip">23 / 40</span></div>
+    <div class="prog" role="img" aria-label="23 daripada 40 soalan dijawab"><i style="width:57.5%"></i></div>
+    <button class="btn primary">Sambung jawab</button>
+  </div>
+  <div>
+    <div class="top" style="margin-bottom:10px"><h3 style="font-size:22px">Pilih soalan</h3><span class="muted num" style="font-size:14px">5 / 13 siap</span></div>
+    <div class="grid" id="grid"></div>
+  </div>
+  <div class="note">Satu set = 40 soalan objektif, kira-kira 1 jam 15 minit.</div>
+</section>
+
+<!-- 3. REPORT -->
+<section class="screen" id="s-report">
+  <div class="top"><button class="btn ghost small" data-s="menu">Semua soalan</button><span class="muted" style="font-size:13px">Aina Sofea</span></div>
+  <div class="card">
+    <div class="gradecard">
+      <div class="bigg" aria-label="Gred B tambah">B+</div>
+      <div><div class="eyebrow">Gred terkini</div><div class="pc num">67.5%</div><div class="up">Naik 2.5 mata daripada set lepas</div></div>
+    </div>
+    <div class="next">
+      <div style="display:flex;justify-content:space-between;gap:8px;font-weight:700"><span>Jejak ke A-</span><span class="num">27 / 28 soalan</span></div>
+      <div class="track" role="img" aria-label="27 daripada 28 soalan betul diperlukan untuk gred A tolak"><i style="width:96.4%"></i><s style="left:96.4%"></s></div>
+      <div class="ticks"><span>0</span><span>Tambah 1 soalan betul untuk A-</span><span>28</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Perkembangan anda</h3>
+    <p>5 set terakhir, markah dalam peratus.</p>
+    <div class="chart">
+      <svg id="line" viewBox="0 0 320 190" role="img" aria-label="Markah naik daripada 50 peratus kepada 67.5 peratus dalam lima set"></svg>
+      <div class="readout" id="ro" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Topik kuat dan topik lemah</h3>
+    <p>Berdasarkan semua soalan yang telah anda jawab.</p>
+    <div class="topics" id="topics"></div>
+    <div class="redo">
+      <div class="eyebrow" style="margin-top:8px">Baca semula, keluk keanjalan</div>
+      <a href="#" onclick="return false">Kelantan, soalan 10<span class="muted">jawapan anda B, betul C</span></a>
+      <a href="#" onclick="return false">Johor, soalan 12<span class="muted">jawapan anda A, betul D</span></a>
+      <a href="#" onclick="return false">Pahang, soalan 8<span class="muted">tidak dijawab</span></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Tiga langkah minggu ini</h3>
+    <p>Cadangan Claude berdasarkan jawapan anda.</p>
+    <div class="card"><ol class="advice">
+      <li><span class="k">1</span><span>Ulang topik <b>keanjalan permintaan dan penawaran</b>. Hafal rumus dan latih 5 soalan pengiraan.</span></li>
+      <li><span class="k">2</span><span>Buat satu set baharu sebelum hujung minggu, sasarkan <b>28 betul</b> untuk capai A-.</span></li>
+      <li><span class="k">3</span><span>Soalan pernyataan I dan II (36-40) sudah bagus. Kekalkan cara anda menilai satu per satu.</span></li>
+    </ol></div>
+  </div>
+
+  <div class="sec">
+    <h3>Pencapaian</h3>
+    <div class="badges" style="margin-top:10px">
+      <div class="bd"><span class="ic">5</span>5 set siap</div>
+      <div class="bd"><span class="ic">3</span>3 hari berturut</div>
+      <div class="bd"><span class="ic">+</span>Naik 10 mata</div>
+      <div class="bd lock"><span class="ic">A-</span>Capai A-</div>
+      <div class="bd lock"><span class="ic">13</span>Semua negeri</div>
+      <div class="bd lock"><span class="ic">A+</span>Capai A+</div>
+    </div>
+  </div>
+  <button class="btn primary" id="share">Cetak laporan / Share</button>
+  <div class="toast" id="toast" aria-live="polite"></div>
+</section>
+</main>
+
+<script>
+(() => {
+const $ = (s, e = document) => e.querySelector(s), $$ = (s, e = document) => [...e.querySelectorAll(s)];
+function show(id){
+  $$(".screen").forEach(x => x.classList.toggle("on", x.id === "s-" + id));
+  $$(".pv .seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === id)));
+  window.scrollTo(0, 0);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-s]"); if (b) show(b.dataset.s);
+  const w = e.target.closest("[data-w]"); if (w) {
+    $$("[data-w]").forEach(x => x.setAttribute("aria-pressed", String(x === w)));
+    $("#w-new").hidden = w.dataset.w !== "new"; $("#w-old").hidden = w.dataset.w !== "old";
+  }
+});
+$("#w-new").hidden = true;
+
+// states
+const S = [["Johor","done","A-",72.5],["Kedah","done","B+",67.5],["Kelantan","go","",0],["Limbang","new"],["Melaka","done","B",62.5],["MPSM KL","new"],["N. Sembilan","new"],["Pahang","done","C+",57.5],["Perak","done","C",52.5],["Perlis","new"],["Putrajaya","new"],["Selangor 1","new"],["Selangor 2","new"]];
+$("#grid").innerHTML = S.map(([n,s,g,p]) => {
+  const cls = s === "done" ? "done" : "";
+  const gc = s !== "done" ? "" : (p >= 70 ? "hi" : "mid");
+  const st = s === "done" ? `Siap · ${p}%` : s === "go" ? "Sedang dijawab" : "Belum mula";
+  return `<button class="sc ${cls}"><div class="r"><span class="n">${n}</span><span class="gr ${gc}">${s === "done" ? g : "–"}</span></div><span class="st ${s === "go" ? "go" : ""}">${st}</span></button>`;
+}).join("");
+
+// topics
+const T = [["Asas ekonomi dan kos lepas",86],["Permintaan dan penawaran",78],["Wang dan perbankan",74],["Peranan kerajaan",70],["Pengeluaran dan kos",66],["Pendapatan dan belanjawan",64],["Perdagangan antarabangsa",59],["Keanjalan",42]];
+$("#topics").innerHTML = T.map(([n,v]) => { const weak = v < 60;
+  return `<div class="tp"><span class="nm">${n}<span class="tag ${weak ? "weak" : "ok"}">${weak ? "Perlu ulang" : "Kuat"}</span></span><span class="v num">${v}%</span><div class="bar" role="img" aria-label="${n} ${v} peratus"><i class="${weak ? "weak" : ""}" style="width:${v}%"></i></div></div>`; }).join("");
+
+// line chart
+const D = [["Set 1","Perak",50],["Set 2","Melaka",57.5],["Set 3","Pahang",60],["Set 4","Kedah",65],["Set 5","Johor",67.5]];
+const W = 320, H = 190, L = 34, R = 30, Tp = 14, B = 28, y0 = 40, y1 = 80;
+const X = i => L + i * (W - L - R) / (D.length - 1), Y = v => Tp + (y1 - v) / (y1 - y0) * (H - Tp - B);
+let g = "";
+[40,50,60,70,80].forEach(v => { g += `<line x1="${L}" x2="${W-R+6}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1" ${v === 70 ? 'stroke-dasharray="4 4" stroke="var(--accent)"' : ""}/><text x="${L-6}" y="${Y(v)+3.5}" text-anchor="end">${v}</text>`; });
+g += `<text x="${W-R+6}" y="${Y(70)-5}" text-anchor="end" style="fill:var(--accent);font-weight:700">A- (70)</text>`;
+const path = D.map((d,i) => (i ? "L" : "M") + X(i) + " " + Y(d[2])).join(" ");
+g += `<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+D.forEach((d,i) => { const last = i === D.length - 1;
+  g += `<text x="${X(i)}" y="${H-8}" text-anchor="middle">${d[0]}</text>`;
+  g += `<circle class="pt" tabindex="0" data-i="${i}" cx="${X(i)}" cy="${Y(d[2])}" r="${last ? 6 : 4.5}" fill="${last ? "var(--accent)" : "var(--bg)"}" stroke="var(--accent)" stroke-width="2.5"/>`;
+  g += `<circle class="pt" data-i="${i}" cx="${X(i)}" cy="${Y(d[2])}" r="16" fill="transparent"/>`; });
+g += `<text x="${X(4)}" y="${Y(67.5)+20}" text-anchor="end" style="fill:var(--ink);font-weight:700;font-size:12px">67.5%</text>`;
+$("#line").innerHTML = g;
+const ro = $("#ro");
+const setRo = i => { const d = D[i]; ro.innerHTML = `<b>${d[0]}</b> · ${d[1]} · <b class="num">${d[2]}%</b> (${Math.round(d[2]*0.4)}/40 betul)`; };
+setRo(4);
+$$("#line .pt").forEach(el => { ["pointerenter","focus","click"].forEach(ev => el.addEventListener(ev, () => setRo(+el.dataset.i))); });
+
+// ===== muka depan: animasi teks + bunyi (Web Audio, mula selepas ketikan) =====
+let ac = null, muted = false;
+try { muted = localStorage.getItem("mpl:mute") === "1"; } catch {}
+const ensure = () => { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch {} } if (ac && ac.state === "suspended") ac.resume(); return ac; };
+const tone = (f, at, dur, type = "triangle", vol = .12) => {
+  if (muted || !ac) return;
+  const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + at;
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + .05);
+};
+const tick = at => tone(1900 + Math.random() * 300, at, .035, "square", .025);
+const jingle = at => { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, at + i * .11, .38, "triangle", .13)); [1046.5, 1318.5, 1568].forEach(f => tone(f, at + .55, 1.1, "sine", .07)); };
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sp = $("#splash"), typed = $("#typed");
+let timers = [];
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+function build() {
+  let i = 0;
+  const mk = (el, text, hlFrom) => { el.innerHTML = ""; [...text].forEach((c, k) => { if (c === " ") { const s = document.createElement("span"); s.className = "sp"; el.append(s); return; } const s = document.createElement("span"); s.className = "ch" + (hlFrom !== undefined && k < hlFrom ? " hl" : ""); s.style.setProperty("--i", i++); s.textContent = c; el.append(s); }); };
+  mk($(".l1", sp), "MISSION"); mk($(".l2", sp), "A+ EKONOMI", 2);
+}
+function syncSnd() { $$(".snd").forEach(b => { b.setAttribute("aria-pressed", String(!muted)); b.textContent = muted ? "Bunyi: mati" : "Bunyi: hidup"; }); }
+function type(text, ms) { typed.textContent = ""; if (reduce) { typed.textContent = text; return; } [...text].forEach((c, k) => later(() => { typed.textContent += c; }, ms + k * 55)); }
+function enter() { sp.classList.add("out"); const h = $(".hero"); h.classList.remove("rise"); void h.offsetWidth; h.classList.add("rise"); }
+function play() {
+  if (sp.classList.contains("go")) return;
+  sp.classList.add("go"); ensure();
+  const n = $$(".sp-title .ch", sp).length;
+  for (let k = 0; k < n; k++) tick(.25 + k * .06);
+  jingle(.25 + n * .06 + .05);
+  type("Jawab. Semak. Naik gred.", 1500);
+  later(enter, reduce ? 800 : 3600);
+}
+function reset() { timers.forEach(clearTimeout); timers = []; sp.classList.remove("go", "out"); typed.textContent = ""; build(); }
+build(); syncSnd();
+$("#start").addEventListener("click", play);
+$("#replay").addEventListener("click", () => { reset(); window.scrollTo(0, 0); });
+$$(".snd").forEach(b => b.addEventListener("click", () => { muted = !muted; try { localStorage.setItem("mpl:mute", muted ? "1" : "0"); } catch {} syncSnd(); if (!muted) { ensure(); tone(880, 0, .15, "triangle", .1); } }));
+
+// share
+$("#share").addEventListener("click", async () => {
+  const t = "Mission A+ Ekonomi: Aina Sofea, gred B+ (67.5%). 5 set siap, naik 17.5 mata sejak set pertama. Sasaran seterusnya: A-.";
+  try { await navigator.clipboard.writeText(t); $("#toast").textContent = "Ringkasan disalin. Tampal di WhatsApp."; }
+  catch { $("#toast").textContent = t; }
+});
+})();
+</script>
+
+</body></html>
